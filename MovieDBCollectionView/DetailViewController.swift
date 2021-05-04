@@ -26,6 +26,7 @@ class DetailViewController: UIViewController {
         
         title = detailTitle
         navigationItem.largeTitleDisplayMode = .never
+    
         overview.text = overviewInfo
         release_date.text = releasedate
         average_vote.text = vote

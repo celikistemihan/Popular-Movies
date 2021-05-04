@@ -10,45 +10,93 @@ import UIKit
 class ViewController: UICollectionViewController {
 
     var movies = [Movie]()
-   
-    var isLoadingStarted = true
     var currentPage = 1
+   
    
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Upcomings"
-        print(movies.count)
+        //self.navigationController?.navigationBar.prefersLargeTitles = true
+        title = "Top Rated Movies"
         
-        
-        let urlString = "https://api.themoviedb.org/3/movie/popular?api_key=58ea4fe48390e0d2e32f6d608a6e7b47&language=en-US&page=\(currentPage)"
-        
-        if let url = URL(string: urlString) {
-            if let data = try? Data(contentsOf: url){
-                parse(json: data)
-            }
-        }
+        getData()
      
     }
    
-
     func parse(json: Data){
         let decoder = JSONDecoder()
         if let jsonMovies = try? decoder.decode(Movies.self, from: json){
-            movies = jsonMovies.results
+            
+            
+            movies.append(contentsOf: jsonMovies.results)
+            
             collectionView.reloadData()
             
         }
     }
     
+    func getData() {
+        
+        let urlString = "https://api.themoviedb.org/3/movie/top_rated?api_key=58ea4fe48390e0d2e32f6d608a6e7b47&language=en-US&page=\(currentPage)"
+        
+        if let url = URL(string: urlString) {
+            if let data = try? Data(contentsOf: url){
+                parse(json: data)
+                currentPage += 1
+            }
+        }
+        
+    }
+
+    // This is the function that increments page number and calls the API function
+    func loadNewItemsFrom(currentPage: Int){
+        self.currentPage += 1
+        getData()
+        
+        collectionView.reloadData()
+      
+    }
+   
+   
+//    override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+//        let offsetY = scrollView.contentOffset.y
+//        let contentHeight = scrollView.contentSize.height
+//
+//        if offsetY > contentHeight - scrollView.frame.size.height {
+//            /* increment page index to load new data set from */
+//
+//            /* call API to load data from next page or just add dummy data to your datasource */
+//            /* Needs to be implemented */
+//            loadNewItemsFrom(currentPage: currentPage)
+//
+//            /* reload tableview with new data */
+//            collectionView.reloadData()
+//        }
+//    }
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+
+        if offsetY > contentHeight - scrollView.frame.size.height {
+            /* increment page index to load new data set from */
+            
+            /* call API to load data from next page or just add dummy data to your datasource */
+            /* Needs to be implemented */
+            loadNewItemsFrom(currentPage: currentPage)
+
+            /* reload tableview with new data */
+            collectionView.reloadData()
+        }
+    }
     
+    
+    
+
+        
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return movies.count
 
     }
-    override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        currentPage += 1
-        
-    }
+   
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let movie = movies[indexPath.row]
